@@ -23,10 +23,10 @@ private final UserRepository userRepository;
 	}
 	
 	public User saveUser(User user) {
-		//Optional<User> userOptional = userRepository.findUserByEmail(user.getEmail());
-		//if(userOptional.isPresent()) {
-		//	throw new IllegalStateException("Email taken");
-		//}
+		Optional<User> userOptional = userRepository.findUserByEmail(user.getEmail());
+		if(userOptional.isPresent()) {
+			throw new IllegalStateException("Email taken");
+		}
 		return userRepository.save(user);
 	}
 	
@@ -54,8 +54,14 @@ private final UserRepository userRepository;
 			if(user.getName() != null && user.getName().length() > 0 && !Objects.equals(existingUser.getName(), user.getName())) {
 				existingUser.setName(user.getName());
 			}
+			if(user.getEmail() != null && user.getEmail().length() > 0 && !Objects.equals(existingUser.getEmail(), user.getEmail())) {
+				Optional<User> userOptional = userRepository.findUserByEmail(user.getEmail());
+				if(userOptional.isPresent()) {
+					throw new IllegalStateException("email taken");
+				}
+				existingUser.setEmail(user.getEmail());
+			}
 			
-			existingUser.setEmail(user.getEmail());
 			existingUser.setFull_name(user.getFull_name());
 			existingUser.setPhone(user.getPhone());
 			existingUser.setFunction(user.getFunction());

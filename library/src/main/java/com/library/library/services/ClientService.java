@@ -2,6 +2,7 @@ package com.library.library.services;
 
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,10 @@ public class ClientService {
 	}
 	
 	public Client saveClient(Client client) {
+		Optional<Client> clientOptional = clientRepository.findClientByEmail(client.getEmail());
+		if(clientOptional.isPresent()) {
+			throw new IllegalStateException("Email taken");
+		}
 		return clientRepository.save(client);
 	}
 	
@@ -45,9 +50,17 @@ public class ClientService {
 		if(optionalClient.isPresent()) {
 			Client existingClient = optionalClient.get();
 			
-			existingClient.setName(client.getName());
+			if(client.getName() != null && client.getName().length() > 0 && !Objects.equals(existingClient.getName(), client.getName())) {
+				existingClient.setName(client.getName());
+			}
+			if(client.getEmail() != null && client.getEmail().length() > 0 && !Objects.equals(existingClient.getEmail(), client.getEmail())) {
+				Optional<Client> clientOptional = clientRepository.findClientByEmail(client.getEmail());
+				if(clientOptional.isPresent()) {
+					throw new IllegalStateException("email taken");
+				}
+				existingClient.setEmail(client.getEmail());
+			}
 			existingClient.setFull_name(client.getFull_name());
-			existingClient.setEmail(client.getEmail());
 			existingClient.setPhone(client.getPhone());
 			
 			return clientRepository.save(existingClient);

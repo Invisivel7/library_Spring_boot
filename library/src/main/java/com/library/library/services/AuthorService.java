@@ -1,6 +1,7 @@
 package com.library.library.services;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -21,6 +22,10 @@ public class AuthorService {
 	}
 	
 	public Author saveAuthor(Author author) {
+		Optional<Author> authorOptional = authorRepository.findAuthorByEmail(author.getEmail());
+		if(authorOptional.isPresent()) {
+			throw new IllegalStateException("Email taken");
+		}
 		return authorRepository.save(author);
 	}
 	
@@ -44,9 +49,17 @@ public class AuthorService {
 		if(optionalAuthor.isPresent()) {
 			Author existingAuthor = optionalAuthor.get();
 			
-			existingAuthor.setName(author.getName());
+			if(author.getName() != null && author.getName().length() > 0 && !Objects.equals(existingAuthor.getName(), author.getName())) {
+				existingAuthor.setName(author.getName());
+			}
+			if(author.getEmail() != null && author.getEmail().length() > 0 && !Objects.equals(existingAuthor.getEmail(), author.getEmail())) {
+				Optional<Author> userOptional = authorRepository.findAuthorByEmail(author.getEmail());
+				if(userOptional.isPresent()) {
+					throw new IllegalStateException("email taken");
+				}
+				existingAuthor.setEmail(author.getEmail());
+			}
 			existingAuthor.setFull_name(author.getFull_name());
-			existingAuthor.setEmail(author.getEmail());
 			existingAuthor.setPhone(author.getPhone());
 			
 			return authorRepository.save(existingAuthor);
